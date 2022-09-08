@@ -1,19 +1,19 @@
-﻿using FluentMigrator;
+using FluentMigrator;
 namespace Database.Migrations;
 
-[Migration(1)]
-public class _0001_AddCategoryTable : Migration
+[Migration(3)]
+public class _0003_AddRecipeTable : Migration
 {
     public override void Up()
     {
-        Create.Table(Tables.Categories)
+        Create.Table(Tables.Recipes)
             .WithColumn("id").AsGuid().PrimaryKey()
-            .WithColumn("name").AsString()
+            .WithColumn("title").AsString()
             .WithColumn("is_active").AsBoolean().NotNullable().WithDefaultValue(true);
     }
 
     public override void Down()
     {
-        Delete.Table(Tables.Categories);
+        Delete.Table(Tables.Recipes);
     }
 }
