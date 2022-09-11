@@ -100,6 +100,7 @@ namespace Database.Seeds
                 foreach(Guid guid in recipe.Item4) {
                     Insert.IntoTable(tableName: Migrations.Tables.RecipesCategories).Row(new
                     {
+                        id = Guid.NewGuid(),
                         recipe_id = recipeGuid,
                         category_id = guid
                     });
