@@ -16,7 +16,7 @@
     <Property Name="AutoAddManyToManyRelationships" Value="false" />
     <Property Name="AutoAssignSequencesToIntegerPks" Value="true" />
     <Property Name="AutoAssignTypeConverterToFieldMapping" Value="true" />
-    <Property Name="AutomaticallyGenerateSourceCodeOnProjectSave" Value="true" />
+    <Property Name="AutomaticallyGenerateSourceCodeOnProjectSave" Value="false" />
     <Property Name="ConnectionStringKeyNamePattern" Value="ConnectionString.{$ProviderName}" />
     <Property Name="DefaultDDLSQLScriptDestinationFolder" Value=".\DDLSQLScripts" />
     <Property Name="DefaultDeleteRuleAction" Value="1" />
@@ -64,7 +64,7 @@
     <Property Name="ResetFieldOrderBasedOnTargetOrderAtRefresh" Value="false" />
     <Property Name="ResetFieldOrderBasedOnTargetOrderAtRelationalModelDataSync" Value="false" />
     <Property Name="RetrieveDBCustomProperties" Value="false" />
-    <Property Name="RootNamespace" Value="Orm" />
+    <Property Name="RootNamespace" Value="" />
     <Property Name="SequenceNameMatchingPattern" Value="SEQ_{$TableName}" />
     <Property Name="SequencePattern" Value="SEQ_{$EntityName}" />
     <Property Name="SetGroupNameAfterSchemaName" Value="true" />
@@ -96,7 +96,7 @@
   <CodeGenerationCyclePreferences>
     <OutputType Value="3">
       <LastUsedPreferences>
-        <DestinationRootFolder Value=".\Code" />
+        <DestinationRootFolder Value="C:\Users\ziadm\Desktop\dody\sk-big-oven-db\Orm" />
         <FrameworkName Value="LLBLGen Pro Runtime Framework" />
         <LanguageName Value="C#" />
         <PlatformName Value=".NET 6" />
@@ -104,15 +104,9 @@
         <RootNamespace Value="Orm" />
         <TemplateGroup Value="Adapter" />
         <TemplateBindings>
-          <Binding Name="SD.TemplateBindings.AccessSpecific" />
-          <Binding Name="SD.TemplateBindings.DB2Specific" />
-          <Binding Name="SD.TemplateBindings.FirebirdSpecific" />
-          <Binding Name="SD.TemplateBindings.MySqlSpecific" />
-          <Binding Name="SD.TemplateBindings.OracleODPNetSpecific" />
           <Binding Name="SD.TemplateBindings.PostgreSqlSpecific" />
           <Binding Name="SD.TemplateBindings.SharedTemplates.Net6" />
           <Binding Name="SD.TemplateBindings.SharedTemplates" />
-          <Binding Name="SD.TemplateBindings.SqlServerSpecific" />
           <Binding Name="SD.TemplateBindings.General" />
         </TemplateBindings>
         <AdhocTemplateSets />
@@ -131,14 +125,14 @@
   <EntityModel>
     <ValueTypeDefinitions />
     <EntityDefinitions>
-      <EntityDefinition Name="Category" ObjectID="404d1a3a-aa1c-4a68-bf05-98a95e9f2457">
+      <EntityDefinition Name="Category" ObjectID="a7e512f0-e8db-4d0b-88b8-e50b535eb5bd">
         <Fields>
           <Field Name="Id" Type="guid" IsPrimaryKey="true" />
           <Field Name="IsActive" Type="bool" />
           <Field Name="Name" Type="string" MaxLength="1073741824" />
         </Fields>
       </EntityDefinition>
-      <EntityDefinition Name="Ingredient" ObjectID="171f627c-c3bd-4cf1-9ceb-8c4b5469081b">
+      <EntityDefinition Name="Ingredient" ObjectID="d431bb57-25d8-4aa3-aee1-e0adeafa4700">
         <Fields>
           <Field Name="Id" Type="guid" IsPrimaryKey="true" />
           <Field Name="Ingredient" Type="string" MaxLength="1000" />
@@ -146,7 +140,7 @@
           <Field Name="RecipeId" Type="guid" />
         </Fields>
       </EntityDefinition>
-      <EntityDefinition Name="Instruction" ObjectID="ec1e2724-d6d1-4fc0-912e-a09ec7094a9c">
+      <EntityDefinition Name="Instruction" ObjectID="fbd83f5d-a6a2-464c-a06e-50ea72fc1b27">
         <Fields>
           <Field Name="Id" Type="guid" IsPrimaryKey="true" />
           <Field Name="Instruction" Type="string" MaxLength="1000" />
@@ -154,20 +148,21 @@
           <Field Name="RecipeId" Type="guid" />
         </Fields>
       </EntityDefinition>
-      <EntityDefinition Name="Recipe" ObjectID="77dffa15-bfa7-4271-8705-a271d4923c8f">
+      <EntityDefinition Name="Recipe" ObjectID="83ec64df-7988-48fc-8dc3-bcb68d2f62fd">
         <Fields>
           <Field Name="Id" Type="guid" IsPrimaryKey="true" />
           <Field Name="IsActive" Type="bool" />
           <Field Name="Title" Type="string" MaxLength="1073741824" />
         </Fields>
       </EntityDefinition>
-      <EntityDefinition Name="RecipesCategory" ObjectID="e003e138-fa62-43e2-9dd7-9f4410a9eebf">
+      <EntityDefinition Name="RecipesCategory" ObjectID="1cfd446a-f768-4a38-bebb-54ce347af817">
         <Fields>
           <Field Name="CategoryId" Type="guid" />
+          <Field Name="Id" Type="guid" IsPrimaryKey="true" />
           <Field Name="RecipeId" Type="guid" />
         </Fields>
       </EntityDefinition>
-      <EntityDefinition Name="User" ObjectID="375f3808-d984-4ed0-8861-65098cac691c">
+      <EntityDefinition Name="User" ObjectID="3190e749-e239-40af-97be-6de1713846be">
         <Fields>
           <Field Name="Id" Type="guid" IsPrimaryKey="true" />
           <Field Name="IsActive" Type="bool" />
@@ -219,7 +214,7 @@
       <Catalogs>
         <Catalog Name="postgres" SyncSource="2">
           <Schemas>
-            <Schema Name="public" SyncSource="2" LastSyncWithDatabase="2022-09-11T19:34:52.3122564Z">
+            <Schema Name="public" SyncSource="2" LastSyncWithDatabase="2022-09-12T13:53:49.903672Z">
               <Tables>
                 <Table Name="categories">
                   <PkConstraintName Name="PK_categories" />
@@ -256,9 +251,11 @@
                   </Fields>
                 </Table>
                 <Table Name="recipes_categories">
+                  <PkConstraintName Name="PK_recipes_categories" />
                   <Fields>
-                    <Field Name="recipe_id" Ordinal="1" DbType="28" />
-                    <Field Name="category_id" Ordinal="2" DbType="28" />
+                    <Field Name="id" Ordinal="1" IsPrimaryKey="true" DbType="28" />
+                    <Field Name="recipe_id" Ordinal="2" DbType="28" />
+                    <Field Name="category_id" Ordinal="3" DbType="28" />
                   </Fields>
                 </Table>
                 <Table Name="users">
@@ -338,6 +335,7 @@
         <EntityMapping EntityName=":RecipesCategory" TargetName="postgres:public:recipes_categories">
           <FieldMappings>
             <FieldMapping FieldName="CategoryId" TargetFieldName="category_id" />
+            <FieldMapping FieldName="Id" TargetFieldName="id" />
             <FieldMapping FieldName="RecipeId" TargetFieldName="recipe_id" />
           </FieldMappings>
         </EntityMapping>
