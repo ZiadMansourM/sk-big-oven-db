@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrmDBSpecific", "Orm\Databa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orm", "Orm\DatabaseGeneric\Orm.csproj", "{2F928F27-E1F4-4729-9CB0-E951DDEC032C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend", "Backend\Backend.csproj", "{D54A32B7-1CBB-49A9-9D5C-911FD8C3A918}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{2F928F27-E1F4-4729-9CB0-E951DDEC032C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F928F27-E1F4-4729-9CB0-E951DDEC032C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F928F27-E1F4-4729-9CB0-E951DDEC032C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D54A32B7-1CBB-49A9-9D5C-911FD8C3A918}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D54A32B7-1CBB-49A9-9D5C-911FD8C3A918}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D54A32B7-1CBB-49A9-9D5C-911FD8C3A918}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D54A32B7-1CBB-49A9-9D5C-911FD8C3A918}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
