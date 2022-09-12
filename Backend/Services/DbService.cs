@@ -3,6 +3,7 @@ using System.Net;
 using System.Text.Json;
 
 using Orm.DatabaseSpecific;
+using Orm.EntityClasses;
 using Orm.Linq;
 using SD.LLBLGen.Pro.DQE.PostgreSql;
 using SD.LLBLGen.Pro.ORMSupportClasses;
@@ -67,6 +68,20 @@ public class DbService
                 );
             }
             return recipes;
+        }
+    }
+
+    // CREATE
+    async public Task<bool> CreateCategory(string name)
+    {
+        using (var adapter = new DataAccessAdapter(Program.config["ConnectionStr"]))
+        {
+            CategoryEntity newCategory = new CategoryEntity
+            {
+                Id = Guid.NewGuid(),
+                Name = name
+            };
+            return await adapter.SaveEntityAsync(newCategory);
         }
     }
 }

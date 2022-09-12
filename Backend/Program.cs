@@ -386,7 +386,7 @@ public static class Category
     public static void Router(IEndpointRouteBuilder router)
     {
         router.MapGet("/categories", ListCategories);
-        //router.MapPost("/categories", CreateCategory);
+        router.MapPost("/categories", CreateCategory);
         //router.MapGet("/categories/{id:guid}", GetCategory);
         //router.MapPut("/categories/{id:guid}", UpdateCategory);
         //router.MapDelete("/categories/{id:guid}", DeleteCategory);
@@ -399,32 +399,32 @@ public static class Category
     }
 
     //[Authorize]
-    //private static IResult CreateCategory([FromBody] string name)
-    //{
-    //    Backend.Models.CategoryValidator validator = new();
-    //    ValidationResult results = validator.Validate(
-    //        new Backend.Models.Category(name)
-    //    );
-    //    if (results.IsValid)
-    //    {
-    //        return Results.Json(
-    //            _service.CreateCategory(name),
-    //            statusCode: 200
-    //        );
-    //    }
-    //    else
-    //    {
-    //        List<string> msgs = new();
-    //        foreach (var failure in results.Errors)
-    //            msgs.Add(
-    //                $"Property {failure.PropertyName}: {failure.ErrorMessage}"
-    //            );
-    //        return Results.Json(
-    //            msgs,
-    //            statusCode: 400
-    //        );
-    //    }
-    //}
+    async private static Task<IResult> CreateCategory([FromBody] string name)
+    {
+        Backend.Models.CategoryValidator validator = new();
+        FluentValidation.Results.ValidationResult results = validator.Validate(
+            new Backend.Models.Category(name)
+        );
+        if (results.IsValid)
+        {
+            return Results.Json(
+                await _service.CreateCategory(name),
+                statusCode: 200
+            );
+        }
+        else
+        {
+            List<string> msgs = new();
+            foreach (var failure in results.Errors)
+                msgs.Add(
+                    $"Property {failure.PropertyName}: {failure.ErrorMessage}"
+                );
+            return Results.Json(
+                msgs,
+                statusCode: 400
+            );
+        }
+    }
 
     //[Authorize]
     //private static IResult GetCategory(Guid id)
