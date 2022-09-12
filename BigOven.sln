@@ -5,6 +5,10 @@ VisualStudioVersion = 25.0.1703.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Database", "Database\Database.csproj", "{6DDB22B6-12A5-4681-8DF1-A25C1D85F759}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrmDBSpecific", "Orm\DatabaseSpecific\OrmDBSpecific.csproj", "{CEEA603B-0703-4C4C-A406-30231A258928}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orm", "Orm\DatabaseGeneric\Orm.csproj", "{2F928F27-E1F4-4729-9CB0-E951DDEC032C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{6DDB22B6-12A5-4681-8DF1-A25C1D85F759}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DDB22B6-12A5-4681-8DF1-A25C1D85F759}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6DDB22B6-12A5-4681-8DF1-A25C1D85F759}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEEA603B-0703-4C4C-A406-30231A258928}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEEA603B-0703-4C4C-A406-30231A258928}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEEA603B-0703-4C4C-A406-30231A258928}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEEA603B-0703-4C4C-A406-30231A258928}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F928F27-E1F4-4729-9CB0-E951DDEC032C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F928F27-E1F4-4729-9CB0-E951DDEC032C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F928F27-E1F4-4729-9CB0-E951DDEC032C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F928F27-E1F4-4729-9CB0-E951DDEC032C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

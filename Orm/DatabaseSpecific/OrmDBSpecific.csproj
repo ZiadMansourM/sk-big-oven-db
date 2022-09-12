@@ -6,6 +6,10 @@
     <RootNamespace>Orm.DatabaseSpecific</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="SD.LLBLGen.Pro.DQE.PostgreSql" Version="5.9.0" />
+    <PackageReference Include="SD.LLBLGen.Pro.DQE.PostgreSql" Version="5.9.2" />
+    <PackageReference Include="SD.LLBLGen.Pro.ORMSupportClasses" Version="5.9.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="SD.LLBLGen.Pro.ORMSupportClasses" />
   </ItemGroup>
 </Project>
