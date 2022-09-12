@@ -12,7 +12,6 @@
     <None Remove="FluentMigrator.Runner.Postgres" />
     <None Remove="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <None Remove="Migrations\" />
-    <None Remove="Orm\" />
     <None Remove="Data\" />
   </ItemGroup>
   <ItemGroup>
@@ -23,7 +22,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Migrations\" />
-    <Folder Include="Orm\" />
     <Folder Include="Data\" />
   </ItemGroup>
 </Project>
