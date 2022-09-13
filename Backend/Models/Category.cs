@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Text.Json.Serialization;
+using FluentValidation;
 namespace Backend.Models;
 
 public class Category
@@ -12,6 +13,7 @@ public class Category
         Name = name;
     }
 
+    [JsonConstructor]
     public Category(Guid id, string name)
     {
         Id = id;

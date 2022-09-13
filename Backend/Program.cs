@@ -276,7 +276,7 @@ public static class Recipe
     public static void Router(IEndpointRouteBuilder router)
     {
         router.MapGet("/recipes", ListRecipes);
-        //router.MapPost("/recipes", CreateRecipe);
+        router.MapPost("/recipes", CreateRecipe);
         //router.MapGet("/recipes/{id:guid}", GetRecipe);
         //router.MapPut("/recipes/{id:guid}", UpdateRecipe);
         //router.MapDelete("/recipes/{id:guid}", DeleteRecipe);
@@ -289,42 +289,45 @@ public static class Recipe
     }
 
     //[Authorize]
-    //private static IResult CreateRecipe([FromBody] Backend.Models.Recipe recipe)
-    //{
-    //    Backend.Models.RecipeValidator validator = new();
-    //    ValidationResult results = validator.Validate(
-    //        new Backend.Models.Recipe(
-    //            recipe.Name,
-    //            recipe.Ingredients,
-    //            recipe.Instructions,
-    //            recipe.CategoriesIds
-    //        )
-    //    );
-    //    if (results.IsValid)
-    //    {
-    //        return Results.Json(
-    //            _service.CreateRecipe(
-    //                recipe.Name,
-    //                recipe.Ingredients,
-    //                recipe.Instructions,
-    //                recipe.CategoriesIds
-    //            ),
-    //            statusCode: 200
-    //        );
-    //    }
-    //    else
-    //    {
-    //        List<string> msgs = new();
-    //        foreach (var failure in results.Errors)
-    //            msgs.Add(
-    //                $"Property {failure.PropertyName}: {failure.ErrorMessage}"
-    //            );
-    //        return Results.Json(
-    //            msgs,
-    //            statusCode: 400
-    //        );
-    //    }
-    //}
+    async private static Task<IResult> CreateRecipe([FromBody] Backend.Models.Recipe recipe)
+    {
+        Console.WriteLine("DEBUG PROGRAM.CS");
+        Backend.Models.RecipeValidator validator = new();
+        FluentValidation.Results.ValidationResult results = validator.Validate(
+            new Backend.Models.Recipe(
+                recipe.Name,
+                recipe.Ingredients,
+                recipe.Instructions,
+                recipe.CategoriesIds
+            )
+        );
+        Console.WriteLine("DEBUG PROGRAM.CS AFTER VALIDATION");
+        if (results.IsValid)
+        {
+            Console.WriteLine("DEBUG PROGRAM.CS CREATE");
+            return Results.Json(
+                await _service.CreateRecipe(
+                    recipe.Name,
+                    recipe.Ingredients,
+                    recipe.Instructions,
+                    recipe.CategoriesIds
+                ),
+                statusCode: 200
+            );
+        }
+        else
+        {
+            List<string> msgs = new();
+            foreach (var failure in results.Errors)
+                msgs.Add(
+                    $"Property {failure.PropertyName}: {failure.ErrorMessage}"
+                );
+            return Results.Json(
+                msgs,
+                statusCode: 400
+            );
+        }
+    }
 
     //[Authorize]
     //private static IResult GetRecipe(Guid id)
@@ -388,7 +391,7 @@ public static class Category
         router.MapGet("/categories", ListCategories);
         router.MapPost("/categories", CreateCategory);
         //router.MapGet("/categories/{id:guid}", GetCategory);
-        //router.MapPut("/categories/{id:guid}", UpdateCategory);
+        router.MapPut("/categories/{id:guid}", UpdateCategory);
         //router.MapDelete("/categories/{id:guid}", DeleteCategory);
     }
 
@@ -433,35 +436,35 @@ public static class Category
     //}
 
     //[Authorize]
-    //private static IResult UpdateCategory(Guid id, [FromBody] Backend.Models.Category category)
-    //{
-    //    Backend.Models.CategoryValidator validator = new();
-    //    ValidationResult results = validator.Validate(
-    //        new Backend.Models.Category(category.Name)
-    //    );
-    //    if (results.IsValid)
-    //    {
-    //        return Results.Json(
-    //            _service.UpdateCategory(
-    //                id,
-    //                category.Name
-    //            ),
-    //            statusCode: 200
-    //        );
-    //    }
-    //    else
-    //    {
-    //        List<string> msgs = new();
-    //        foreach (var failure in results.Errors)
-    //            msgs.Add(
-    //                $"Property {failure.PropertyName}: {failure.ErrorMessage}"
-    //            );
-    //        return Results.Json(
-    //            msgs,
-    //            statusCode: 400
-    //        );
-    //    }
-    //}
+    async private static Task<IResult> UpdateCategory(Guid id, [FromBody] Backend.Models.Category category)
+    {
+        Backend.Models.CategoryValidator validator = new();
+        FluentValidation.Results.ValidationResult results = validator.Validate(
+            new Backend.Models.Category(category.Name)
+        );
+        if (results.IsValid)
+        {
+            return Results.Json(
+                await _service.UpdateCategory(
+                    id,
+                    category.Name
+                ),
+                statusCode: 200
+            );
+        }
+        else
+        {
+            List<string> msgs = new();
+            foreach (var failure in results.Errors)
+                msgs.Add(
+                    $"Property {failure.PropertyName}: {failure.ErrorMessage}"
+                );
+            return Results.Json(
+                msgs,
+                statusCode: 400
+            );
+        }
+    }
 
     //[Authorize]
     //private static IResult DeleteCategory(Guid id)

@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Text.Json.Serialization;
+using FluentValidation;
 
 namespace Backend.Models;
 
@@ -19,6 +20,7 @@ public class Recipe
         CategoriesIds = categoriesIds;
     }
 
+    [JsonConstructor]
     public Recipe(Guid id, string name, List<string> ingredients, List<string> instructions, List<Guid> categoriesIds)
     {
         Id = id;

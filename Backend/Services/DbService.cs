@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Net;
-using System.Text.Json;
 
 using Orm.DatabaseSpecific;
 using Orm.EntityClasses;
 using Orm.Linq;
 using SD.LLBLGen.Pro.DQE.PostgreSql;
+using SD.LLBLGen.Pro.LinqSupportClasses;
 using SD.LLBLGen.Pro.ORMSupportClasses;
 
 namespace Backend.Services;
@@ -82,6 +82,64 @@ public class DbService
                 Name = name
             };
             return await adapter.SaveEntityAsync(newCategory);
+        }
+    }
+
+    async public Task<Models.Recipe> CreateRecipe(string name, List<string> ingredients, List<string> instructions, List<Guid> categoriesIds)
+    {
+        using (var adapter = new DataAccessAdapter(Program.config["ConnectionStr"]))
+        {
+            Models.Recipe recipe = new Models.Recipe(name, ingredients, instructions, categoriesIds);
+            RecipeEntity newRecipe = new RecipeEntity
+            {
+                Id = recipe.Id,
+                Title = recipe.Name
+            };
+            await adapter.SaveEntityAsync(newRecipe);
+            foreach(string ing in recipe.Ingredients)
+            {
+                IngredientEntity newIngredient = new IngredientEntity
+                {
+                    Id = Guid.NewGuid(),
+                    RecipeId = recipe.Id,
+                    Ingredient = ing
+                };
+                await adapter.SaveEntityAsync(newIngredient);
+            }
+            foreach (string ins in recipe.Instructions)
+            {
+                InstructionEntity newInstruction = new InstructionEntity
+                {
+                    Id = Guid.NewGuid(),
+                    RecipeId = recipe.Id,
+                    Instruction = ins
+                };
+                await adapter.SaveEntityAsync(newInstruction);
+            }
+            foreach (Guid guid in recipe.CategoriesIds)
+            {
+                RecipesCategoryEntity newIdGuid = new RecipesCategoryEntity
+                {
+                    Id = Guid.NewGuid(),
+                    RecipeId = recipe.Id,
+                    CategoryId = guid
+                };
+                await adapter.SaveEntityAsync(newIdGuid);
+            }
+            return recipe;
+        }
+    }
+
+    // UPDATE
+    async public Task<Models.Category> UpdateCategory(Guid id, string name)
+    {
+        using (var adapter = new DataAccessAdapter(Program.config["ConnectionStr"]))
+        {
+            var metaData = new LinqMetaData(adapter);
+            CategoryEntity category = await metaData.Category.FirstOrDefaultAsync(c => c.Id == id);
+            category.Name = name;
+            await adapter.SaveEntityAsync(category);
+            return new Models.Category(id, name);
         }
     }
 }
