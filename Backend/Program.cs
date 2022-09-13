@@ -278,8 +278,8 @@ public static class Recipe
         router.MapGet("/recipes", ListRecipes);
         router.MapPost("/recipes", CreateRecipe);
         //router.MapGet("/recipes/{id:guid}", GetRecipe);
-        //router.MapPut("/recipes/{id:guid}", UpdateRecipe);
-        //router.MapDelete("/recipes/{id:guid}", DeleteRecipe);
+        router.MapPut("/recipes/{id:guid}", UpdateRecipe);
+        router.MapDelete("/recipes/{id:guid}", DeleteRecipe);
     }
 
     //[Authorize]
@@ -336,50 +336,50 @@ public static class Recipe
     //}
 
     //[Authorize]
-    //private static IResult UpdateRecipe(Guid id, [FromBody] Backend.Models.Recipe recipe)
-    //{
-    //    Backend.Models.RecipeValidator validator = new();
-    //    ValidationResult results = validator.Validate(
-    //        new Backend.Models.Recipe(
-    //            recipe.Name,
-    //            recipe.Ingredients,
-    //            recipe.Instructions,
-    //            recipe.CategoriesIds
-    //        )
-    //    );
-    //    if (results.IsValid)
-    //    {
-    //        return Results.Json(
-    //            _service.UpdateRecipe(
-    //                id,
-    //                recipe.Name,
-    //                recipe.Ingredients,
-    //                recipe.Instructions,
-    //                recipe.CategoriesIds
-    //            ),
-    //            statusCode: 200
-    //        );
-    //    }
-    //    else
-    //    {
-    //        List<string> msgs = new();
-    //        foreach (var failure in results.Errors)
-    //            msgs.Add(
-    //                $"Property {failure.PropertyName}: {failure.ErrorMessage}"
-    //            );
-    //        return Results.Json(
-    //            msgs,
-    //            statusCode: 400
-    //        );
-    //    }
-    //}
+    async private static Task<IResult> UpdateRecipe(Guid id, [FromBody] Backend.Models.Recipe recipe)
+    {
+        Backend.Models.RecipeValidator validator = new();
+        FluentValidation.Results.ValidationResult results = validator.Validate(
+            new Backend.Models.Recipe(
+                recipe.Name,
+                recipe.Ingredients,
+                recipe.Instructions,
+                recipe.CategoriesIds
+            )
+        );
+        if (results.IsValid)
+        {
+            return Results.Json(
+                await _service.UpdateRecipe(
+                    id,
+                    recipe.Name,
+                    recipe.Ingredients,
+                    recipe.Instructions,
+                    recipe.CategoriesIds
+                ),
+                statusCode: 200
+            );
+        }
+        else
+        {
+            List<string> msgs = new();
+            foreach (var failure in results.Errors)
+                msgs.Add(
+                    $"Property {failure.PropertyName}: {failure.ErrorMessage}"
+                );
+            return Results.Json(
+                msgs,
+                statusCode: 400
+            );
+        }
+    }
 
     //[Authorize]
-    //private static IResult DeleteRecipe(Guid id)
-    //{
-    //    _service.DeleteRecipe(id);
-    //    return Results.Json(new { message = "Deleted Successfully" }, statusCode: 200);
-    //}
+    async private static Task<IResult> DeleteRecipe(Guid id)
+    {
+        await _service.DeleteRecipe(id);
+        return Results.Json(new { message = "Deleted Successfully" }, statusCode: 200);
+    }
 }
 
 public static class Category

@@ -143,6 +143,67 @@ public class DbService
         }
     }
 
+    async public Task<Models.Recipe> UpdateRecipe(Guid id, string name, List<string> ingredients, List<string> instructions, List<Guid> categoriesIds)
+    {
+        using (var adapter = new DataAccessAdapter(Program.config["ConnectionStr"]))
+        {
+            var metaData = new LinqMetaData(adapter);
+            // [1] Recipe
+            RecipeEntity newRecipe = await metaData.Recipe.FirstOrDefaultAsync(r => r.Id == id);
+            newRecipe.Title = name;
+            await adapter.SaveEntityAsync(newRecipe);
+            // [2] Ingredients DELETE then CREATE
+            foreach (IngredientEntity ingredient in metaData.Ingredient)
+            {
+                if (ingredient.RecipeId == id)
+                    await adapter.DeleteEntityAsync(ingredient);
+            }
+            foreach (string ing in ingredients)
+            {
+                IngredientEntity newIngredient = new IngredientEntity
+                {
+                    Id = Guid.NewGuid(),
+                    RecipeId = id,
+                    Ingredient = ing
+                };
+                await adapter.SaveEntityAsync(newIngredient);
+            }
+            // [3] Instructions
+            foreach (InstructionEntity instruction in metaData.Instruction)
+            {
+                if (instruction.RecipeId == id)
+                    await adapter.DeleteEntityAsync(instruction);
+            }
+            foreach (string ins in instructions)
+            {
+                InstructionEntity newInstruction = new InstructionEntity
+                {
+                    Id = Guid.NewGuid(),
+                    RecipeId = id,
+                    Instruction = ins
+                };
+                await adapter.SaveEntityAsync(newInstruction);
+            }
+            // [4] Guids
+            foreach (RecipesCategoryEntity recipeCategory in metaData.RecipesCategory)
+            {
+                if (recipeCategory.RecipeId == id)
+                    await adapter.DeleteEntityAsync(recipeCategory);
+            }
+            foreach (Guid guid in categoriesIds)
+            {
+                RecipesCategoryEntity recipesCategory = new RecipesCategoryEntity
+                {
+                    Id = Guid.NewGuid(),
+                    RecipeId = id,
+                    CategoryId = guid
+                };
+                await adapter.SaveEntityAsync(recipesCategory);
+            }
+            return new Models.Recipe(id, name, ingredients, instructions, categoriesIds);
+        }
+    }
+
     // DELETE
     async public Task DeleteCategory(Guid id)
     {
@@ -158,6 +219,31 @@ public class DbService
             }
             CategoryEntity category = await metaData.Category.FirstOrDefaultAsync(c => c.Id == id);
             await adapter.DeleteEntityAsync(category);
+        }
+    }
+
+    async public Task DeleteRecipe(Guid id)
+    {
+        using (var adapter = new DataAccessAdapter(Program.config["ConnectionStr"]))
+        {
+            var metaData = new LinqMetaData(adapter);
+            foreach (RecipesCategoryEntity recipeCategory in metaData.RecipesCategory)
+            {
+                if (recipeCategory.RecipeId == id)
+                    await adapter.DeleteEntityAsync(recipeCategory);
+            }
+            foreach (InstructionEntity instruction in metaData.Instruction)
+            {
+                if (instruction.RecipeId == id)
+                    await adapter.DeleteEntityAsync(instruction);
+            }
+            foreach (IngredientEntity ingredient in metaData.Ingredient)
+            {
+                if (ingredient.RecipeId == id)
+                    await adapter.DeleteEntityAsync(ingredient);
+            }
+            RecipeEntity recipe = await metaData.Recipe.FirstOrDefaultAsync(r => r.Id == id);
+            await adapter.DeleteEntityAsync(recipe);
         }
     }
 }
