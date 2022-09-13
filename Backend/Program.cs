@@ -392,7 +392,7 @@ public static class Category
         router.MapPost("/categories", CreateCategory);
         //router.MapGet("/categories/{id:guid}", GetCategory);
         router.MapPut("/categories/{id:guid}", UpdateCategory);
-        //router.MapDelete("/categories/{id:guid}", DeleteCategory);
+        router.MapDelete("/categories/{id:guid}", DeleteCategory);
     }
 
     //[Authorize]
@@ -467,12 +467,12 @@ public static class Category
     }
 
     //[Authorize]
-    //private static IResult DeleteCategory(Guid id)
-    //{
-    //    _service.DeleteCategory(id);
-    //    return Results.Json(
-    //        new { message = "Deleted Successfully!" },
-    //        statusCode: 200
-    //    );
-    //}
+    async private static Task<IResult> DeleteCategory(Guid id)
+    {
+        await _service.DeleteCategory(id);
+        return Results.Json(
+            new { message = "Deleted Successfully!" },
+            statusCode: 200
+        );
+    }
 }

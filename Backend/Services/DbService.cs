@@ -142,5 +142,23 @@ public class DbService
             return new Models.Category(id, name);
         }
     }
+
+    // DELETE
+    async public Task DeleteCategory(Guid id)
+    {
+        using (var adapter = new DataAccessAdapter(Program.config["ConnectionStr"]))
+        {
+            var metaData = new LinqMetaData(adapter);
+            foreach (RecipesCategoryEntity recipeCategory in metaData.RecipesCategory)
+            {
+                if (recipeCategory.CategoryId == id)
+                {
+                    await adapter.DeleteEntityAsync(recipeCategory);
+                }
+            }
+            CategoryEntity category = await metaData.Category.FirstOrDefaultAsync(c => c.Id == id);
+            await adapter.DeleteEntityAsync(category);
+        }
+    }
 }
 
