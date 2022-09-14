@@ -12,24 +12,24 @@ using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 var builder = WebApplication.CreateBuilder(args);
-// ConfigureServices
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(options =>
-//    {
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuerSigningKey = true,
-//            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
-//                .GetBytes(Program.config["SECRET_KEY"])
-//            ),
-//            ValidateIssuer = false,
-//            ValidateAudience = false,
-//            ClockSkew = TimeSpan.Zero
-//        };
-//    }
-//);
+// ConfigureServicess
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
+                .GetBytes(Program.config["SECRET_KEY"])
+            ),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ClockSkew = TimeSpan.Zero
+        };
+    }
+);
 
-//builder.Services.AddAuthorization();
+builder.Services.AddAuthorization();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AnyOrigin", builder =>
@@ -81,9 +81,9 @@ if (!app.Environment.IsDevelopment())
 }
 app.UseCors("AnyOrigin");
 
-//app.UseAuthentication();
+app.UseAuthentication();
 
-//app.UseAuthorization();
+app.UseAuthorization();
 
 Authentication.Router(app);
 Category.Router(app);
@@ -117,13 +117,13 @@ public static class Authentication
 
     public static void Router(IEndpointRouteBuilder router)
     {
-        //router.MapPost("/register", RegisterUser);
-        //router.MapPost("/login", UserLogin);
+        router.MapPost("/register", RegisterUser);
+        router.MapPost("/login", UserLogin);
         //router.MapPost("/refresh", UserRefreshToken);
         router.MapGet("/users", ListUsers);
         //router.MapGet("/users/{id:guid}", GetUser);
         //router.MapPut("/users/{id:guid}", UpdateUser);
-        //router.MapDelete("/users/{id:guid}", DeleteUser);
+        router.MapDelete("/users/{id:guid}", DeleteUser);
     }
 
     //[Authorize]
@@ -138,75 +138,74 @@ public static class Authentication
     //    return Results.Json(_service.GetUser(id), statusCode: 200);
     //}
 
-    //private static IResult UserRefreshToken(Guid id, Microsoft.AspNetCore.Http.HttpRequest request, Microsoft.AspNetCore.Http.HttpResponse response)
-    //{
-    //    var refreshToken = request.Cookies["refreshToken"];
-    //    bool valid = _service.ListUsers().Any(u => u.Id == id);
-    //    if (valid)
-    //    {
-    //        var user = _service.ListUsers().Where(u => u.Id == id).First();
-    //        if (!user.RefreshToken.Equals(refreshToken))
-    //            return Results.Json("Invalid Refresh Token.", statusCode: 401);
-    //        else if (user.TokenExpires < DateTime.Now)
-    //            return Results.Json("Token expired.", statusCode: 401);
-    //        // [1]: Generate Token
-    //        string token = _service.GetTocken(user.Username);
-    //        // [2]: Generate Refresh token
-    //        Backend.Models.RefreshToken newrefreshToken = _service.GenerateRefreshToken();
-    //        // [3]: Response.Cookies.Append("refreshToken", newRefreshToken.Token, cookieOptions);
-    //        var cookieOptions = new CookieOptions
-    //        {
-    //            HttpOnly = true,
-    //            Expires = newrefreshToken.Expires
-    //        };
-    //        response.Cookies.Append("refreshToken", newrefreshToken.Token, cookieOptions);
-    //        // [4]: user.RefreshToken = RefreshToken
-    //        _service.SetRefreshToken(newrefreshToken, user.Username);
-    //        return Results.Json(
-    //            token,
-    //            statusCode: 200
-    //        );
-    //    }
-    //    else
-    //    {
-    //        List<string> msgs = new();
-    //        msgs.Add(
-    //            $"Invalid Refresh token!"
-    //        );
-    //        return Results.Json(
-    //            msgs,
-    //            statusCode: 400
-    //        );
-    //    }
-    //    //return Results.Json(_service.GetUser(id), statusCode: 200);
-    //}
+    async private static Task<IResult> UserRefreshToken(Guid id, Microsoft.AspNetCore.Http.HttpRequest request, Microsoft.AspNetCore.Http.HttpResponse response)
+    {
+        var refreshToken = request.Cookies["refreshToken"];
+        bool valid = _service.ListUsers().Any(u => u.Id == id);
+        if (valid)
+        {
+            var user = _service.ListUsers().Where(u => u.Id == id).First();
+            if (!user.RefreshToken.Equals(refreshToken))
+                return Results.Json("Invalid Refresh Token.", statusCode: 401);
+            else if (user.TokenExpires < DateTime.Now)
+                return Results.Json("Token expired.", statusCode: 401);
+            // [1]: Generate Token
+            string token = _service.GetTocken(user.Username);
+            // [2]: Generate Refresh token
+            Backend.Models.RefreshToken newrefreshToken = _service.GenerateRefreshToken();
+            // [3]: Response.Cookies.Append("refreshToken", newRefreshToken.Token, cookieOptions);
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = newrefreshToken.Expires
+            };
+            response.Cookies.Append("refreshToken", newrefreshToken.Token, cookieOptions);
+            // [4]: user.RefreshToken = RefreshToken
+            await _service.SetRefreshToken(newrefreshToken, user.Username);
+            return Results.Json(
+                token,
+                statusCode: 200
+            );
+        }
+        else
+        {
+            List<string> msgs = new();
+            msgs.Add(
+                $"Invalid Refresh token!"
+            );
+            return Results.Json(
+                msgs,
+                statusCode: 400
+            );
+        }
+    }
 
-    //private static IResult RegisterUser([FromBody] Backend.Models.UserDTO user)
-    //{
-    //    bool valid = (
-    //        !string.IsNullOrEmpty(user.Username) &&
-    //        !string.IsNullOrEmpty(user.Password) &&
-    //        !_service.ListUsers().Any(u => u.Username == user.Username)
-    //    );
-    //    if (valid)
-    //    {
-    //        return Results.Json(
-    //            _service.Register(user),
-    //            statusCode: 200
-    //        );
-    //    }
-    //    else
-    //    {
-    //        List<string> msgs = new();
-    //        msgs.Add(
-    //            $"Username and Password can't be Empty, or this Username is taken!"
-    //        );
-    //        return Results.Json(
-    //            msgs,
-    //            statusCode: 400
-    //        );
-    //    }
-    //}
+    async private static Task<IResult> RegisterUser([FromBody] Backend.Models.UserDTO user)
+    {
+        bool valid = (
+            !string.IsNullOrEmpty(user.Username) &&
+            !string.IsNullOrEmpty(user.Password) &&
+            !_service.ListUsers().Any(u => u.Username == user.Username)
+        );
+        if (valid)
+        {
+            return Results.Json(
+                await _service.Register(user),
+                statusCode: 200
+            );
+        }
+        else
+        {
+            List<string> msgs = new();
+            msgs.Add(
+                $"Username and Password can't be Empty, or this Username is taken!"
+            );
+            return Results.Json(
+                msgs,
+                statusCode: 400
+            );
+        }
+    }
 
     //[Authorize]
     //private static IResult UpdateUser([FromBody] Backend.Models.User user)
@@ -214,58 +213,58 @@ public static class Authentication
     //    return Results.Json(_service.UpdateUser(user.Id, user.Username, ), statusCode: 200);
     //}
 
-    //[Authorize]
-    //private static IResult DeleteUser(Guid id)
-    //{
-    //    _service.DeleteUser(id);
-    //    return Results.Json("Deleted Successfully", statusCode: 200);
-    //}
+    [Authorize]
+    async private static Task<IResult> DeleteUser(Guid id)
+    {
+        await _service.DeleteUser(id);
+        return Results.Json("Deleted Successfully", statusCode: 200);
+    }
 
-    //private static IResult UserLogin([FromBody] Backend.Models.UserDTO user, Microsoft.AspNetCore.Http.HttpResponse response)
-    //{
-    //    var logedUser = _service.ListUsers().Where(
-    //        u => u.Username == user.Username).First();
-    //    bool valid = _service.ListUsers().Any(
-    //        u => u.Username == user.Username &&
-    //        (new PasswordHasher<User>())
-    //        .VerifyHashedPassword(logedUser, logedUser.PasswordHash, user.Password)
-    //        .Equals(PasswordVerificationResult.Success)
-    //    );
-    //    if (valid)
-    //    {
-    //        string token = _service.GetTocken(user.Username);
-    //        // [2]: Generate Refresh token
-    //        Backend.Models.RefreshToken refreshToken = _service.GenerateRefreshToken();
-    //        // [3]: Response.Cookies.Append("refreshToken", newRefreshToken.Token, cookieOptions);
-    //        var cookieOptions = new CookieOptions
-    //        {
-    //            HttpOnly = true,
-    //            Expires = refreshToken.Expires
-    //        };
-    //        response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
-    //        // [4]: user.RefreshToken = RefreshToken
-    //        _service.SetRefreshToken(refreshToken, user.Username);
-    //        Dictionary<string, string> dict = new Dictionary<string, string> {
-    //            { "token", token },
-    //            { "id", logedUser.Id.ToString() }
-    //        };
-    //        return Results.Json(
-    //            dict,
-    //            statusCode: 200
-    //        );
-    //    }
-    //    else
-    //    {
-    //        List<string> msgs = new();
-    //        msgs.Add(
-    //            $"Invalid username or password!"
-    //        );
-    //        return Results.Json(
-    //            msgs,
-    //            statusCode: 400
-    //        );
-    //    }
-    //}
+    async private static Task<IResult> UserLogin([FromBody] Backend.Models.UserDTO user, Microsoft.AspNetCore.Http.HttpResponse response)
+    {
+        var logedUser = _service.ListUsers().Where(
+            u => u.Username == user.Username).First();
+        bool valid = _service.ListUsers().Any(
+            u => u.Username == user.Username &&
+            (new PasswordHasher<User>())
+            .VerifyHashedPassword(logedUser, logedUser.PasswordHash, user.Password)
+            .Equals(PasswordVerificationResult.Success)
+        );
+        if (valid)
+        {
+            string token = _service.GetTocken(user.Username);
+            // [2]: Generate Refresh token
+            Backend.Models.RefreshToken refreshToken = _service.GenerateRefreshToken();
+            // [3]: Response.Cookies.Append("refreshToken", newRefreshToken.Token, cookieOptions);
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = refreshToken.Expires
+            };
+            response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
+            // [4]: user.RefreshToken = RefreshToken
+            await _service.SetRefreshToken(refreshToken, user.Username);
+            Dictionary<string, string> dict = new Dictionary<string, string> {
+                { "token", token },
+                { "id", logedUser.Id.ToString() }
+            };
+            return Results.Json(
+                dict,
+                statusCode: 200
+            );
+        }
+        else
+        {
+            List<string> msgs = new();
+            msgs.Add(
+                $"Invalid username or password!"
+            );
+            return Results.Json(
+                msgs,
+                statusCode: 400
+            );
+        }
+    }
 }
 
 
@@ -282,13 +281,13 @@ public static class Recipe
         router.MapDelete("/recipes/{id:guid}", DeleteRecipe);
     }
 
-    //[Authorize]
+    [Authorize]
     private static IResult ListRecipes()
     {
         return Results.Json(_service.ListRecipes(), statusCode: 200);
     }
 
-    //[Authorize]
+    [Authorize]
     async private static Task<IResult> CreateRecipe([FromBody] Backend.Models.Recipe recipe)
     {
         Console.WriteLine("DEBUG PROGRAM.CS");
@@ -335,7 +334,7 @@ public static class Recipe
     //    return Results.Json(_service.GetRecipe(id), statusCode: 200);
     //}
 
-    //[Authorize]
+    [Authorize]
     async private static Task<IResult> UpdateRecipe(Guid id, [FromBody] Backend.Models.Recipe recipe)
     {
         Backend.Models.RecipeValidator validator = new();
@@ -374,7 +373,7 @@ public static class Recipe
         }
     }
 
-    //[Authorize]
+    [Authorize]
     async private static Task<IResult> DeleteRecipe(Guid id)
     {
         await _service.DeleteRecipe(id);
@@ -395,13 +394,13 @@ public static class Category
         router.MapDelete("/categories/{id:guid}", DeleteCategory);
     }
 
-    //[Authorize]
+    [Authorize]
     private static IResult ListCategories()
     {
         return Results.Json(_service.ListCategories(), statusCode: 200);
     }
 
-    //[Authorize]
+    [Authorize]
     async private static Task<IResult> CreateCategory([FromBody] string name)
     {
         Backend.Models.CategoryValidator validator = new();
@@ -435,7 +434,7 @@ public static class Category
     //    return Results.Json(_service.GetCategory(id), statusCode: 200);
     //}
 
-    //[Authorize]
+    [Authorize]
     async private static Task<IResult> UpdateCategory(Guid id, [FromBody] Backend.Models.Category category)
     {
         Backend.Models.CategoryValidator validator = new();
@@ -466,7 +465,7 @@ public static class Category
         }
     }
 
-    //[Authorize]
+    [Authorize]
     async private static Task<IResult> DeleteCategory(Guid id)
     {
         await _service.DeleteCategory(id);

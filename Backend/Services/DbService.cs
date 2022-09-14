@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Net;
-
+using System.Security.Claims;
+using Backend.Models;
+using System.Security.Cryptography;
 using Orm.DatabaseSpecific;
 using Orm.EntityClasses;
 using Orm.Linq;
 using SD.LLBLGen.Pro.DQE.PostgreSql;
 using SD.LLBLGen.Pro.LinqSupportClasses;
 using SD.LLBLGen.Pro.ORMSupportClasses;
+using System.Xml.Linq;
 
 namespace Backend.Services;
 
@@ -17,6 +20,7 @@ public class DbService
         RuntimeConfiguration.ConfigureDQE<PostgreSqlDQEConfiguration>(c => c.AddDbProviderFactory(typeof(Npgsql.NpgsqlFactory)));
     }
 
+    // LIST
     public List<Models.User> ListUsers()
     {
         using (var adapter = new DataAccessAdapter(Program.config["ConnectionStr"]))
@@ -72,6 +76,25 @@ public class DbService
     }
 
     // CREATE
+    async public Task<Backend.Models.User> Register(Backend.Models.UserDTO user)
+    {
+        Models.User newUser = new Models.User();
+        newUser.Username = user.Username;
+        newUser.PasswordHash = (new Microsoft.AspNetCore.Identity
+            .PasswordHasher<Models.User>()).HashPassword(newUser, user.Password);
+        using (var adapter = new DataAccessAdapter(Program.config["ConnectionStr"]))
+        {
+            UserEntity dbUser = new UserEntity
+            {
+                Id = Guid.NewGuid(),
+                Username = newUser.Username,
+                PasswordHash = newUser.PasswordHash
+            };
+            await adapter.SaveEntityAsync(dbUser);
+            return newUser;
+        }
+    }
+
     async public Task<bool> CreateCategory(string name)
     {
         using (var adapter = new DataAccessAdapter(Program.config["ConnectionStr"]))
@@ -205,6 +228,16 @@ public class DbService
     }
 
     // DELETE
+    async public Task DeleteUser(Guid id)
+    {
+        using (var adapter = new DataAccessAdapter(Program.config["ConnectionStr"]))
+        {
+            var metaData = new LinqMetaData(adapter);
+            UserEntity user = await metaData.User.FirstOrDefaultAsync(c => c.Id == id);
+            await adapter.DeleteEntityAsync(user);
+        }
+    }
+
     async public Task DeleteCategory(Guid id)
     {
         using (var adapter = new DataAccessAdapter(Program.config["ConnectionStr"]))
@@ -244,6 +277,57 @@ public class DbService
             }
             RecipeEntity recipe = await metaData.Recipe.FirstOrDefaultAsync(r => r.Id == id);
             await adapter.DeleteEntityAsync(recipe);
+        }
+    }
+
+    // Other
+    public string GetTocken(string username)
+    {
+        List<Claim> claims = new List<Claim> {
+            new Claim(ClaimTypes.Name, username)
+        };
+
+        // SECRET_KEY will be stored safely later
+        var key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+            System.Text.Encoding.UTF8.GetBytes(Program.config["SECRET_KEY"])
+        );
+
+        var creds = new Microsoft.IdentityModel.Tokens.SigningCredentials(
+            key,
+            Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha512Signature
+        );
+
+        var token = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
+            claims: claims,
+            expires: DateTime.Now.AddDays(1),
+            signingCredentials: creds
+        );
+
+        return new System.IdentityModel.Tokens.Jwt
+            .JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public RefreshToken GenerateRefreshToken()
+    {
+        var refreshToken = new RefreshToken
+        {
+            Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+            Expires = DateTime.Now.AddDays(7),
+            Created = DateTime.Now
+        };
+        return refreshToken;
+    }
+
+    async public Task SetRefreshToken(RefreshToken newRefreshToken, string username)
+    {
+        using (var adapter = new DataAccessAdapter(Program.config["ConnectionStr"]))
+        {
+            var metaData = new LinqMetaData(adapter);
+            UserEntity updatedUser = await metaData.User.FirstOrDefaultAsync(u => u.Username == username);
+            updatedUser.RefreshToken = newRefreshToken.Token;
+            updatedUser.TokenCreated = newRefreshToken.Created;
+            updatedUser.TokenExpires = newRefreshToken.Expires;
+            await adapter.SaveEntityAsync(updatedUser);
         }
     }
 }
