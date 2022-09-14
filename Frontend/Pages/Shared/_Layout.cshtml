@@ -1,0 +1,450 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="This is a temp project">
+    <meta name="author" content="Ziad Mansour Mohamed SREboy.com">
+    <title>BigOven - @ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Frontend.styles.css" asp-append-version="true" />
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        /* [14]: x-cloak */
+        [x-cloak] {
+            display: none !important;
+        }
+        #card-custom {
+            background: hsla(0, 0%, 100%, 0.15);
+        }
+        body {
+            background-color: hsl(218, 41%, 15%);
+            background-image: radial-gradient(
+                650px circle at 0% 0%,
+                hsl(218, 41%, 35%) 15%,
+                hsl(218, 41%, 30%) 35%,
+                hsl(218, 41%, 20%) 75%,
+                hsl(218, 41%, 19%) 80%,
+                transparent 100%
+            ),
+            radial-gradient(
+            1250px circle at 100% 100%,
+            hsl(218, 41%, 45%) 15%,
+            hsl(218, 41%, 30%) 35%,
+            hsl(218, 41%, 20%) 75%,
+            hsl(218, 41%, 19%) 80%,
+            transparent 100%
+            );
+        }
+    </style>
+</head>
+<body class="text-center text-white">
+    <div 
+        class="container d-flex flex-column min-vh-100 p-3"
+        x-data="state()"
+        x-init="loadInit()"
+    >
+        <nav class="navbar navbar-expand-md navbar-dark">
+            <div class="col text-start">
+                <h3>👨‍🍳 BigOven</h3>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           x-on:click="open='home'; errMsgs=[]"
+                           x-bind:class="open=='home'?'active':''">
+                            Home
+                        </a>
+                    </li>
+                    <template x-if="loged">
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               x-on:click="open='recipes'; errMsgs=[]"
+                               x-bind:class="open=='recipes'?'active':''">
+                                Recipes
+                            </a>
+                        </li>
+                    </template>
+                    <template x-if="loged">
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               x-on:click="open='categories'; errMsgs=[]"
+                               x-bind:class="open=='categories'?'active':''">
+                                Categories
+                            </a>
+                        </li>
+                    </template>
+                    <template x-if="!loged">
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               x-on:click="open='login'; errMsgs=[]"
+                               x-bind:class="open=='login'?'active':''">
+                                Login
+                            </a>
+                        </li>
+                    </template>
+                    <template x-if="!loged">
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               x-on:click="open='register'; errMsgs=[]"
+                               x-bind:class="open=='register'?'active':''">
+                                Signup
+                            </a>
+                        </li>
+                    </template>
+                    <li class="nav-item">
+                        <a class="nav-link font-weight-bold"
+                           href="https://skbigoven.azurewebsites.net/api/swagger">
+                            API
+                        </a>
+                    </li>
+                    <template x-if="loged">
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               x-on:click="logOut()">
+                                Logout
+                            </a>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+        </nav>
+        <main role="main" class="px-3 my-auto">
+            @RenderBody()
+        </main>
+
+        <footer class="text-white-50">
+            <p>&copy; <span x-text="new Date().getFullYear()"></span> <a href="https://www.SREboy.com/" class="text-white link">SREboy.com</a></p>
+        </footer>
+
+        <script>
+            function state() {
+                return {
+                    baseAddress: '@Program.config["BaseAddress"]',
+                    loged: false,
+                    open: 'home',
+                    errMsgs: [],
+                    activeUser: { id: '', username: '', password: '' },
+                    categories: [],
+                    activeCategory: { id: '', name: '' },
+                    recipes: [],
+                    activeRecipe: { 
+                        id: '', name: '', ingredients: "", instructions: "", categoriesIds: [],
+                        strCategoriesNames: '', ingredientsLength: '', instructionsLength: '',
+                        categoriesIdsLength: ''
+                    },
+                    sendRecipe: { id: '', name: '', ingredients: "", instructions: "", categoriesIds: [] },
+                    catNameGuid: {},
+                    catGuidName: {},
+                    token: '',
+                    loadInit() {
+                        if (localStorage.hasOwnProperty('token')) {
+                            this.loged = true;
+                            this.token = localStorage.getItem('token');
+                            this.loadCategories();
+                            this.loadRecipes();
+                        }
+                    },
+                    async checkToken() {
+                        if (JSON.parse(window.atob(this.token.split('.')[1])).exp < Date.now() / 1000) {
+                            let response = await fetch(`${this.baseAddress}/refresh?id=${this.activeUser.id}`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            });
+                            if (!response.ok) {
+                                if (response.status != 400) {
+                                    const message = `An error has occured: ${response.status}`;
+                                    console.log(message);
+                                    throw new Error(message);
+                                }
+                                let msgs = await response.json();
+                                this.errMsgs = msgs;
+                            }
+                            let token = await response.json();
+                            this.token = token;
+                        }
+                    },
+                    async loadCategories() {
+                        let response = await fetch(`${this.baseAddress}/categories`, {
+                            headers: {
+                                'Authorization': 'bearer ' + this.token
+                            }
+                        });
+                        if (!response.ok) {
+                            const message = `An error has occured: ${response.status}`;
+                            console.log(message);
+                            throw new Error(message);
+                        }
+                        let categories = await response.json();
+                        this.categories = categories;
+                        for(let i = 0; i < this.categories.length; i++) {
+                            this.catGuidName[categories[i].id]=categories[i].name;
+                            this.catNameGuid[categories[i].name]=categories[i].id;
+                        }
+                    },
+                    async createCategories() {
+                        await this.checkToken();
+                        let response = await fetch(`${this.baseAddress}/categories`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'bearer ' + this.token
+                            },
+                            body: JSON.stringify(this.activeCategory.name)
+                        });
+                        if (!response.ok) {
+                            if (response.status != 400)
+                            {
+                                const message = `An error has occured: ${response.status}`;
+                                console.log(message);
+                                throw new Error(message);
+                            }
+                            let msgs = await response.json()
+                            this.errMsgs = msgs;
+                        }
+                        this.loadCategories();
+                        this.cleanActiveCategory();
+                    },
+                    async deleteCategory() {
+                        let response = await fetch(`${this.baseAddress}/categories/${this.activeCategory.id}`, {
+                            method: 'DELETE',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Authorization': 'bearer ' + this.token
+                            }
+                        });
+                        if (!response.ok) {
+                            const message = `An error has occured: ${response.status}`;
+                            console.log(message);
+                            throw new Error(message);
+                        }
+                        this.loadCategories();
+                        this.cleanActiveCategory();
+                    },
+                    async updateCategory() {
+                        let response = await fetch(`${this.baseAddress}/categories/${this.activeCategory.id}`, {
+                            method: 'PUT',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Authorization': 'bearer ' + this.token
+                            },
+                            body: JSON.stringify(this.activeCategory)
+                        });
+                        if (!response.ok) {
+                            const message = `An error has occured: ${response.status}`;
+                            console.log(message);
+                            throw new Error(message);
+                        }
+                        this.loadCategories();
+                        this.cleanActiveCategory();
+                    },
+                    initActiveCategory(category) {
+                        this.activeCategory.id=category.id; 
+                        this.activeCategory.name=category.name;
+                    },
+                    cleanActiveCategory() { this.activeCategory={ id: '', name: '' } },
+                    async loadRecipes() {
+                        let response = await fetch(`${this.baseAddress}/recipes`, {
+                            headers: {
+                                'Authorization': 'bearer ' + this.token
+                            }
+                        });
+                        if (!response.ok) {
+                            const message = `An error has occured: ${response.status}`;
+                            console.log(message);
+                            throw new Error(message);
+                        }
+                        let recipes = await response.json();
+                        this.recipes = recipes;
+                    },
+                    async updateRecipe() {
+                        @* ingredients *@
+                        this.activeRecipe.ingredients = this.activeRecipe.ingredients.split("- ").slice(1).map(e => e.trim());
+                        @* instructions *@
+                        this.activeRecipe.instructions = this.activeRecipe.instructions.split("- ").slice(1).map(e => e.trim());
+                        this.initSendRecipe();
+                        let response = await fetch(`${this.baseAddress}/recipes/${this.sendRecipe.id}`, {
+                            method: 'PUT',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Authorization': 'bearer ' + this.token
+                            },
+                            body: JSON.stringify(this.sendRecipe)
+                        });
+                        if (!response.ok) {
+                            if (response.status != 400)
+                            {
+                                const message = `An error has occured: ${response.status}`;
+                                console.log(message);
+                                throw new Error(message);
+                            }
+                            let msgs = await response.json()
+                            this.errMsgs = msgs;
+                        }
+                        this.loadRecipes();
+                        this.cleanActiveRecipe();
+                    },
+                    async createRecipe() {
+                        @* ingredients *@
+                        this.activeRecipe.ingredients = this.activeRecipe.ingredients.split("- ").slice(1).map(e => e.trim());
+                        @* instructions *@
+                        this.activeRecipe.instructions = this.activeRecipe.instructions.split("- ").slice(1).map(e => e.trim());
+                        this.initSendRecipe();
+                        this.sendRecipe.id = '5bce2199-e099-4630-bd1d-1521bc4c368a';
+                        let response = await fetch(`${this.baseAddress}/recipes`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'bearer ' + this.token
+                            },
+                            body: JSON.stringify(this.sendRecipe)
+                        });
+                        if (!response.ok) {
+                            if (response.status != 400)
+                            {
+                                const message = `An error has occured: ${response.status}`;
+                                console.log(message);
+                                throw new Error(message);
+                            }
+                            let msgs = await response.json()
+                            this.errMsgs = msgs;
+                        }
+                        this.loadRecipes();
+                        this.cleanActiveRecipe();
+                    },
+                    async deleteRecipe() {
+                        let response = await fetch(`${this.baseAddress}/recipes/${this.activeRecipe.id}`, {
+                            method: 'DELETE',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Authorization': 'bearer ' + this.token
+                            }
+                        });
+                        if (!response.ok) {
+                            const message = `An error has occured: ${response.status}`;
+                            console.log(message);
+                            throw new Error(message);
+                        }
+                        this.loadRecipes();
+                        this.cleanActiveRecipe();
+                    },
+                    cleanActiveRecipe() { 
+                        this.activeRecipe={ 
+                            id: '', name: '', ingredients: "", instructions: "", categoriesIds: [],
+                            strCategoriesNames: '', ingredientsLength: '', instructionsLength: '',
+                            categoriesIdsLength: ''
+                        }
+                    },
+                    initActiveRecipe(recipe) {
+                        this.activeRecipe.id=recipe.id;
+                        this.activeRecipe.name=recipe.name;
+                        @* Ingredients *@
+                        let ingStr = '';
+                        for(let i = 0; i < recipe.ingredients.length-1; i++)
+                            ingStr += "- " + recipe.ingredients[i] + "\r";
+                        ingStr += "- " + recipe.ingredients[recipe.ingredients.length-1];
+                        this.activeRecipe.ingredients=ingStr;
+                        this.activeRecipe.ingredientsLength=recipe.ingredients.length;
+                        @* Instructions *@
+                        let insStr = '';
+                        for(let i = 0; i < recipe.instructions.length-1; i++)
+                            insStr += "- " + recipe.instructions[i] + "\r";
+                        insStr += "- " + recipe.instructions[recipe.instructions.length-1];
+                        this.activeRecipe.instructions=insStr;
+                        this.activeRecipe.instructionsLength=recipe.instructions.length;
+                        @* categoriesIds *@
+                        this.activeRecipe.categoriesIds=recipe.categoriesIds;
+                        this.loadCategories();
+                        let catStr = '';
+                        for(let i = 0; i < recipe.categoriesIds.length-1; i++)
+                            catStr += "- " + this.catGuidName[recipe.categoriesIds[i]] + "\r";
+                        catStr += "- " + this.catGuidName[recipe.categoriesIds[recipe.categoriesIds.length-1]];
+                        this.activeRecipe.categoriesIdsLength=recipe.categoriesIds.length;
+                        this.activeRecipe.strCategoriesNames=catStr;
+                    },
+                    initSendRecipe() {
+                        this.sendRecipe.id=this.activeRecipe.id;
+                        this.sendRecipe.name=this.activeRecipe.name;
+                        this.sendRecipe.ingredients=this.activeRecipe.ingredients;
+                        this.sendRecipe.instructions=this.activeRecipe.instructions;
+                        this.sendRecipe.categoriesIds=this.activeRecipe.categoriesIds;
+                    },
+                    async loginFunc() {
+                        if (this.activeUser.username.trim() == '' || this.activeUser.password.trim() == '') {
+                            this.errMsgs = ["Username and Password can not be empty ..."];
+                            return;
+                        }
+                        let response = await fetch(`${this.baseAddress}/login`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(this.activeUser)
+                        });
+                        if (!response.ok) {
+                            if (response.status != 400) {
+                                const message = `An error has occured: ${response.status}`;
+                                console.log(message);
+                                throw new Error(message);
+                            }
+                            let msgs = await response.json();
+                            this.errMsgs = msgs;
+                        }
+                        let res = await response.json();
+                        this.token = res.token;
+                        localStorage.setItem('token', this.token);
+                        this.activeUser = { id: res.id, username: '', password: '' };
+                        this.loged = true;
+                        this.open = 'home';
+                        this.loadCategories();
+                        this.loadRecipes();
+                    },
+                    async registerFunc() {
+                        if (this.activeUser.username.trim() == '' || this.activeUser.password.trim() == '') {
+                            this.errMsgs = ["Username and Password can not be empty ..."];
+                            return;
+                        }
+                        let response = await fetch(`${this.baseAddress}/register`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(this.activeUser)
+                        });
+                        if (!response.ok) {
+                            if (response.status != 400) {
+                                const message = `An error has occured: ${response.status}`;
+                                console.log(message);
+                                throw new Error(message);
+                            }
+                            let msgs = ["Please Enter Correct Username and Password..."]
+                            this.errMsgs = msgs;
+                        }
+                        this.activeUser = { username: '', password: '' };
+                        this.open = 'login';
+                    },
+                    logOut() {
+                        this.open = 'home';
+                        this.token = '';
+                        this.loged = false;
+                        this.errMsgs = [];
+                        localStorage.removeItem('token');
+                    }
+                }
+            }
+        </script>
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+
+        @await RenderSectionAsync("Scripts", required: false)
+    </div>
+</body>
+</html>
