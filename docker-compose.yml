@@ -27,7 +27,7 @@ services:
   db:
     image: postgres
     volumes:
-      - ./Database/Data:/var/lib/postgresql/data
+      - ./Backend/Data:/var/lib/postgresql/data
     restart: always
     environment:
       - POSTGRES_USER=postgres
