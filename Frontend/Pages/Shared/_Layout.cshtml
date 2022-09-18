@@ -143,9 +143,11 @@
                     catGuidName: {},
                     token: '',
                     loadInit() {
-                        if (localStorage.hasOwnProperty('token')) {
-                            this.loged = true;
+                        if (localStorage.hasOwnProperty('token') && localStorage.hasOwnProperty('userId')) {
                             this.token = localStorage.getItem('token');
+                            this.activeUser.id = localStorage.getItem('userId');
+                            this.checkToken();
+                            this.loged = true;
                             this.loadCategories();
                             this.loadRecipes();
                         }
@@ -167,8 +169,8 @@
                                 let msgs = await response.json();
                                 this.errMsgs = msgs;
                             }
-                            let token = await response.json();
-                            this.token = token;
+                            let tok = await response.json();
+                            this.token = tok;
                         }
                     },
                     async loadCategories() {
@@ -399,8 +401,9 @@
                         }
                         let res = await response.json();
                         this.token = res.token;
-                        localStorage.setItem('token', this.token);
                         this.activeUser = { id: res.id, username: '', password: '' };
+                        localStorage.setItem('token', this.token);
+                        localStorage.setItem('userId', this.activeUser.id);
                         this.loged = true;
                         this.open = 'home';
                         this.loadCategories();
@@ -436,6 +439,7 @@
                         this.loged = false;
                         this.errMsgs = [];
                         localStorage.removeItem('token');
+                        localStorage.removeItem('userId');
                     }
                 }
             }
