@@ -163,19 +163,19 @@
                         </div>
                     </div>
                     <div class="form-floating custom-form-floating">
-                        <textarea class="form-control h-100" x-text="activeRecipe.ingredients" :rows="activeRecipe.ingredientsLength" id="floatingTextarea2" readonly>
+                        <textarea class="form-control h-100" x-text="activeRecipe.ingredients" :rows="activeRecipe.ingredientsLength" id="floatingTextarea2DetailIng" readonly>
                         </textarea>
-                        <label for="floatingTextarea2">Ingredients</label>
+                        <label for="floatingTextarea2DetailIng">Ingredients</label>
                     </div>
                     <div class="form-floating custom-form-floating">
-                        <textarea class="form-control h-100" x-text="activeRecipe.instructions" :rows="activeRecipe.instructionsLength" id="floatingTextarea2" readonly>
+                        <textarea class="form-control h-100" x-text="activeRecipe.instructions" :rows="activeRecipe.instructionsLength" id="floatingTextarea2DetailIns" readonly>
                         </textarea>
-                        <label for="floatingTextarea2">Instructions</label>
+                        <label for="floatingTextarea2DetailIns">Instructions</label>
                     </div>
                     <div class="form-floating custom-form-floating">
-                        <textarea class="form-control h-100" x-text="activeRecipe.strCategoriesNames" :rows="activeRecipe.categoriesIdsLength" id="floatingTextarea2" readonly>
+                        <textarea class="form-control h-100" x-text="activeRecipe.strCategoriesNames" :rows="activeRecipe.categoriesIdsLength" id="floatingTextarea2DetailCat" readonly>
                         </textarea>
-                        <label for="floatingTextarea2">Categories</label>
+                        <label for="floatingTextarea2DetailCat">Categories</label>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -209,14 +209,14 @@
                             </div>
                         </div>
                         <div class="form-floating custom-form-floating">
-                            <textarea class="form-control h-100" x-model="activeRecipe.ingredients" :rows="activeRecipe.ingredientsLength" id="floatingTextarea2" required>
+                            <textarea class="form-control h-100" x-model="activeRecipe.ingredients" :rows="activeRecipe.ingredientsLength" id="floatingTextarea2UpdateIng" required>
                             </textarea>
-                            <label for="floatingTextarea2">Ingredients</label>
+                            <label for="floatingTextarea2UpdateIng">Ingredients</label>
                         </div>
                         <div class="form-floating custom-form-floating">
-                            <textarea class="form-control h-100" x-model="activeRecipe.instructions" :rows="activeRecipe.instructionsLength" id="floatingTextarea2" required>
+                            <textarea class="form-control h-100" x-model="activeRecipe.instructions" :rows="activeRecipe.instructionsLength" id="floatingTextarea2UpdateIns" required>
                             </textarea>
-                            <label for="floatingTextarea2">Instructions</label>
+                            <label for="floatingTextarea2UpdateIns">Instructions</label>
                         </div>
                         <template x-for="cat in categories">
                             <div class="form-check form-switch text-start">
@@ -253,14 +253,14 @@
                             </div>
                         </div>
                         <div class="form-floating custom-form-floating">
-                            <textarea class="form-control h-100" x-model="activeRecipe.ingredients" :rows="activeRecipe.ingredientsLength" id="floatingTextarea2" required>
+                            <textarea class="form-control h-100" x-model="activeRecipe.ingredients" :rows="activeRecipe.ingredientsLength" id="floatingTextarea2CreateIng" required>
                             </textarea>
-                            <label for="floatingTextarea2">Ingredients</label>
+                            <label for="floatingTextarea2CreateIng">Ingredients</label>
                         </div>
                         <div class="form-floating custom-form-floating">
-                            <textarea class="form-control h-100" x-model="activeRecipe.instructions" :rows="activeRecipe.instructionsLength" id="floatingTextarea2" required>
+                            <textarea class="form-control h-100" x-model="activeRecipe.instructions" :rows="activeRecipe.instructionsLength" id="floatingTextarea2CreateIns" required>
                             </textarea>
-                            <label for="floatingTextarea2">Instructions</label>
+                            <label for="floatingTextarea2CreateIns">Instructions</label>
                         </div>
                         <template x-for="cat in categories">
                             <div class="form-check form-switch text-start">
