@@ -31,7 +31,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="6.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.9" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.5" />
-    <PackageReference Include="Npgsql" Version="6.0.6" />
+    <PackageReference Include="Npgsql" Version="6.0.7" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Orm\DatabaseGeneric\Orm.csproj">

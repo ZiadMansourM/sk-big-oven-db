@@ -119,7 +119,7 @@ public static class Authentication
     {
         router.MapPost("/register", RegisterUser);
         router.MapPost("/login", UserLogin);
-        //router.MapPost("/refresh", UserRefreshToken);
+        router.MapPost("/refresh", UserRefreshToken);
         router.MapGet("/users", ListUsers);
         //router.MapGet("/users/{id:guid}", GetUser);
         //router.MapPut("/users/{id:guid}", UpdateUser);
