@@ -223,7 +223,18 @@ public static class Authentication
     async private static Task<IResult> UserLogin([FromBody] Backend.Models.UserDTO user, Microsoft.AspNetCore.Http.HttpResponse response)
     {
         var logedUser = _service.ListUsers().Where(
-            u => u.Username == user.Username).First();
+            u => u.Username == user.Username).FirstOrDefault();
+        if (logedUser==null)
+        {
+            List<string> msgs = new()
+            {
+                $"Invalid username or password!"
+            };
+            return Results.Json(
+                msgs,
+                statusCode: 400
+            );
+        }
         bool valid = _service.ListUsers().Any(
             u => u.Username == user.Username &&
             (new PasswordHasher<User>())
@@ -255,10 +266,10 @@ public static class Authentication
         }
         else
         {
-            List<string> msgs = new();
-            msgs.Add(
+            List<string> msgs = new()
+            {
                 $"Invalid username or password!"
-            );
+            };
             return Results.Json(
                 msgs,
                 statusCode: 400
